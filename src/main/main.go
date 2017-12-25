@@ -83,14 +83,14 @@ var count int = 0
 
 func tm1Expire(val interface{}) {
 	count++
-	if count%1000 == 0 {
-		now := time.Now()
-		fmt.Println("tm1 expire: ", now, ", delta =", now.Sub(old))
-		old = now
-		/*if count > 1100 {
-			panic("finish")
-		}*/
-	}
+	//if count%1000 == 0 {
+	now := time.Now()
+	fmt.Println("tm1 expire: ", now, ", delta =", now.Sub(old).Seconds()*1000.0)
+	old = now
+	/*if count > 1100 {
+		panic("finish")
+	}*/
+	//}
 }
 
 func TimeWheelTimer() {
@@ -113,7 +113,7 @@ func TimeWheelTimer() {
 }
 
 func GoTimer() {
-	ticker := time.NewTicker(time.Millisecond * 100)
+	ticker := time.NewTicker(time.Millisecond * 10)
 	go func(ticker *time.Ticker) {
 		old = time.Now()
 		for {
@@ -124,7 +124,7 @@ func GoTimer() {
 			count++
 			//if count%100 == 0 {
 			now := time.Now()
-			fmt.Println("now =", now, ", delta =", now.Sub(old))
+			fmt.Println("now =", now, ", delta =", now.Sub(old).Seconds()*1000.0)
 			old = now
 			//}
 			//tw.Step(int64(time.Now().UnixNano()))
@@ -136,18 +136,19 @@ func GoTimer() {
 func main() {
 	TimeWheelTimer()
 
-	go func() {
+	/*go func() {
 		for {
 			fmt.Println("please input a string")
 			var str string
 			fmt.Scanln(&str)
 			fmt.Println("input =", str)
 		}
-	}()
+	}()*/
 
 	//GoTimer()
 
 	for {
+		time.Sleep(time.Second * 1)
 	}
 
 	return
