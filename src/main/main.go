@@ -3,11 +3,17 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"reflect"
 	"time"
+
+	"rtp"
+
+	"github.com/lioneagle/goutil/src/algorithm/timewheel"
+	"github.com/lioneagle/goutil/src/buffer"
+	"github.com/lioneagle/goutil/src/test"
 
 	_ "github.com/Go-SQL-Driver/MySQL"
 	"github.com/gin-gonic/gin"
-	"github.com/lioneagle/goutil/src/algorithm/timewheel"
 )
 
 var DB = make(map[string]string)
@@ -133,7 +139,105 @@ func GoTimer() {
 	}(ticker)
 }
 
+func f1() {
+	type ret struct {
+		x1 int
+	}
+
+	r1 := ret{1}
+	fmt.Println(r1)
+}
+
+func f2() {
+	type ret struct {
+		x1 int
+	}
+
+	r1 := ret{1}
+	fmt.Println(r1)
+}
+
+type Error1 struct {
+	x1 int
+}
+
+func (this *Error1) Error() string {
+	return "123"
+}
+
+type t1 struct {
+	Err error
+}
+
 func main() {
+
+	tt := t1{&Error1{1}}
+	tt2 := t1{&Error1{1}}
+
+	fmt.Println(tt == tt2)
+	fmt.Printf("tt = %#v\n", tt)
+	fmt.Printf("tt2 = %#v\n", tt2)
+	//var err2 error
+
+	//err = &Error1{1}
+
+	//err2 = err
+
+	fmt.Println("actual.Type() =", reflect.ValueOf(tt.Err).Type())
+	fmt.Println("actual.Type() =", reflect.ValueOf(tt).Field(0).Type())
+	fmt.Println("actual.Type() =", reflect.ValueOf(tt).Field(0).Elem().Type())
+
+	fmt.Printf("Method1 = %#v\n", reflect.ValueOf(tt).Field(0).Elem().MethodByName("Error"))
+	fmt.Printf("Method2 = %#v\n", reflect.ValueOf(tt.Err).MethodByName("Error"))
+	fmt.Printf("Method2 = Method1 = %v\n", reflect.ValueOf(tt.Err).MethodByName("Error") == reflect.ValueOf(tt).Field(0).Elem().MethodByName("Error"))
+
+	r1 := reflect.ValueOf(tt).Field(0).Elem().MethodByName("Error").Call(nil)
+	//r1 := reflect.ValueOf(tt.Err).MethodByName("Error").Call(nil)
+
+	fmt.Println("r1 =", r1)
+
+	//return
+
+	//ok, ret := test.Diff(nil, 2)
+	var x1 *int
+	var x2 int
+	ok, ret := test.Diff(nil, 2)
+	fmt.Println("ok =", ok)
+	fmt.Println(ret)
+
+	ok, ret = test.Diff(x1, &x2)
+	fmt.Println("ok =", ok)
+	fmt.Println(ret)
+
+	array1 := [4]int{1, 2, 3, 4}
+	array2 := [4]int{1, 2}
+
+	ok, ret = test.Diff(array1, array2)
+	fmt.Println("ok =", ok)
+	fmt.Println(ret)
+
+	//return
+
+	data := []byte{0x80, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 10}
+	packet := rtp.RtpPacket{}
+	packet.CopyFromBytes(data)
+
+	packet.SetPayloadType(9)
+	packet.SetSequence(20)
+	packet.SetTimestamp(160)
+
+	show := buffer.NewByteBuffer(nil)
+	packet.Print(show)
+	fmt.Printf("%s\n", show.String())
+
+	buf := buffer.NewByteBuffer(nil)
+	packet.CopyToByteBuffer(buf)
+
+	show.Reset()
+	buf.PrintAsHex(show, 0, buf.Len())
+	fmt.Printf("%s\n", show.String())
+
+	return
 	TimeWheelTimer()
 
 	/*go func() {
