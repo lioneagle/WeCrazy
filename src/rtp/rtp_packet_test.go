@@ -27,8 +27,8 @@ func TestRtpPacket(t *testing.T) {
 	}
 
 	inputs := []struct {
-		src *result
-		ret *result
+		src    *result
+		wanted *result
 	}{
 		{&result{version: 1, padding: true, extension: true, marker: true, payloadType: 8, sequence: 2, timestamp: 100, csrcCount: 4, ssrc: 123456, csrc: []uint32{1, 2, 3, 4}, extensionProfile: 5678, extensions: []byte{11, 12, 13, 14}, setExtensionsOk: true},
 			&result{version: 1, padding: true, extension: true, marker: true, payloadType: 8, sequence: 2, timestamp: 100, csrcCount: 4, ssrc: 123456, csrc: []uint32{1, 2, 3, 4}, extensionProfile: 5678, extensions: []byte{11, 12, 13, 14}, setExtensionsOk: true}},
@@ -95,9 +95,7 @@ func TestRtpPacket(t *testing.T) {
 			ret.extensionProfile = rtp.GetExtensionProfile()
 			ret.extensions = rtp.GetExtension()
 
-			fmt.Println(v.ret)
-
-			ok, msg := test.DiffEx("", ret, v.ret)
+			ok, msg := test.DiffEx("", ret, v.wanted)
 			if !ok {
 				rtp.Print(os.Stdout)
 				t.Errorf("\n" + msg)
